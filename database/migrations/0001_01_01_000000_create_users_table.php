@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('user_id');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('user_cedula')->unique();
             $table->string('user_nombre');
             $table->string('user_apellido');
             $table->enum('user_genero', ['M', 'F', 'O'])->nullable();

@@ -21,7 +21,6 @@ class AuthController extends Controller
             'user_apellido' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'user_cedula' => 'required|string|unique:users',
             'user_genero' => 'nullable|in:M,F,O',
             'user_fec_nac' => 'nullable|date',
             'user_foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -32,7 +31,6 @@ class AuthController extends Controller
             'user_apellido' => $request->user_apellido,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'user_cedula' => $request->user_cedula,
             'user_genero' => $request->user_genero,
             'user_fec_nac' => $request->user_fec_nac,
         ];
