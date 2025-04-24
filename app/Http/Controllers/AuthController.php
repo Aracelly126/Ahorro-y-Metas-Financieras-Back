@@ -13,7 +13,7 @@ class AuthController extends Controller
     /**
      * Registro de usuario (no inicia sesión automáticamente)
      */
-    public function registro(Request $request)
+    public function register(Request $request)
     {
         $request->validate([
             'user_nombre' => 'required|string|max:255',
@@ -79,7 +79,7 @@ class AuthController extends Controller
     /**
      * Obtener perfil del usuario autenticado
      */
-    public function perfil(Request $request)
+    public function profile(Request $request)
     {
         return response()->json([
             'usuario' => $request->user()->only([
@@ -98,7 +98,7 @@ class AuthController extends Controller
     /**
      * Cerrar sesión (revoca todos los tokens)
      */
-    public function cerrar_todas_sesion(Request $request)
+    public function all_logout(Request $request)
     {
         // Obtenemos el ID del usuario antes de eliminar los tokens
         $userId = $request->user()->user_id;
@@ -115,7 +115,7 @@ class AuthController extends Controller
     /**
      * Cerrar sesión en dispositivo actual (revoca solo el token actual)
      */
-    public function cerrar_sesion(Request $request)
+    public function logout(Request $request)
     {
         // Obtenemos el ID del usuario antes de eliminar el token
         $userId = $request->user()->user_id;
