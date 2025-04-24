@@ -1,30 +1,23 @@
 <?php
-require_once './config/database.php';
 
-class DatabaseSeeder {
-    private $pdo;
+namespace Database\Seeders;
 
-    public function __construct() {
-        // Usamos la clase Database para obtener la conexión
-        $this->pdo = \Config\Database::connect();
-    }
+use App\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
-    public function run() {
-        // Lista de seeders a ejecutar
-        $seeders = [
-            'CategoriasSeeder',
-            'ClientesSeeder',
-            'MetasAhorroSeeder',
-            'AportesSeeder'
-        ];
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // User::factory(10)->create();
 
-        foreach ($seeders as $seeder) {
-            // Incluir el archivo del seeder
-            require_once __DIR__ . "/{$seeder}.php";
-            // Instanciamos el seeder y lo ejecutamos
-            $seederInstance = new $seeder($this->pdo);
-            $seederInstance->run();
-            echo "Seeder ejecutado: {$seeder}\n";
-        }
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
     }
 }

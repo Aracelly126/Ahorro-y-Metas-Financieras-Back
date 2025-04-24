@@ -1,14 +1,20 @@
 <?php
-require_once '../vendor/autoload.php';
-require_once './core/EnvLoader.php';
 
-use Core\Router;
-use Core\EnvLoader;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 
-EnvLoader::load('./.env');
+define('LARAVEL_START', microtime(true));
 
-$router = new Router();
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
 
-require_once '../app/Routes/routes.php';
+// Register the Composer autoloader...
+require __DIR__.'/../vendor/autoload.php';
 
-$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$app->handleRequest(Request::capture());
