@@ -16,15 +16,23 @@ class AuthController extends Controller
     public function registro(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'user_nombre' => 'required|string|max:255',
+            'user_apellido' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'user_cedula' => 'required|string|unique:users',
+            'user_genero' => 'nullable|in:M,F,O',
+            'user_fec_nac' => 'nullable|date',
         ]);
 
         $usuario = User::create([
-            'name' => $request->name,
+            'user_nombre' => $request->user_nombre,
+            'user_apellido' => $request->user_apellido,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'user_cedula' => $request->user_cedula,
+            'user_genero' => $request->user_genero,
+            'user_fec_nac' => $request->user_fec_nac,
         ]);
 
         return response()->json([
@@ -38,14 +46,24 @@ class AuthController extends Controller
      */
     public function loginsito(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        // Cambia esta parte
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Credenciales inválidas'], 401);
+        // Mapeamos los campos personalizados a los que espera Auth
+        $authCredentials = [
+            'email' => $request->email,
+            'password' => $request->password
+        ];
+
+        if (!Auth::attempt($authCredentials)) {
+            return response()->json([
+                'message' => 'Credenciales inválidas',
+                'errors' => [
+                    'email' => ['Correo o contraseña incorrectos']
+                ]
+            ], 401);
         }
 
         $user = Auth::user();
@@ -55,7 +73,7 @@ class AuthController extends Controller
             'message' => 'Inicio de sesión exitoso',
             'token' => $token,
             'usuario' => $user
-        ]);
+        ], 200);
     }
 
     /**
@@ -64,7 +82,16 @@ class AuthController extends Controller
     public function perfil(Request $request)
     {
         return response()->json([
-            'usuario' => $request->user()->only(['id', 'name', 'email'])
+            'usuario' => $request->user()->only([
+                'user_id',
+                'user_nombre',
+                'user_apellido',
+                'email',
+                'user_cedula',
+                'user_genero',
+                'user_fec_nac',
+                'user_foto_path'
+            ])
         ]);
     }
 
@@ -74,7 +101,7 @@ class AuthController extends Controller
     public function cerrar_todas_sesion(Request $request)
     {
         // Obtenemos el ID del usuario antes de eliminar los tokens
-        $userId = $request->user()->id;
+        $userId = $request->user()->user_id;
 
         // Revocamos todos los tokens
         $request->user()->tokens()->delete();
@@ -91,7 +118,7 @@ class AuthController extends Controller
     public function cerrar_sesion(Request $request)
     {
         // Obtenemos el ID del usuario antes de eliminar el token
-        $userId = $request->user()->id;
+        $userId = $request->user()->user_id;
 
         // Revocamos solo el token actual
         $request->user()->currentAccessToken()->delete();
