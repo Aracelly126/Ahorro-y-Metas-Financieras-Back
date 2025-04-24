@@ -17,6 +17,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/auth/profile', [AuthController::class, 'profile'])->name('auth.profile');
+    Route::post('/auth/update-photo', [AuthController::class, 'updateProfilePhoto']);
+    Route::get('/auth/profile-photo', [AuthController::class, 'getProfilePhoto']);
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::post('/auth/all_logout', [AuthController::class, 'all_logout'])->name('auth.all_logout');
 

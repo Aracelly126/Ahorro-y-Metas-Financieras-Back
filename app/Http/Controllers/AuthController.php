@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -23,9 +24,10 @@ class AuthController extends Controller
             'user_cedula' => 'required|string|unique:users',
             'user_genero' => 'nullable|in:M,F,O',
             'user_fec_nac' => 'nullable|date',
+            'user_foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $usuario = User::create([
+        $userData = [
             'user_nombre' => $request->user_nombre,
             'user_apellido' => $request->user_apellido,
             'email' => $request->email,
@@ -33,7 +35,15 @@ class AuthController extends Controller
             'user_cedula' => $request->user_cedula,
             'user_genero' => $request->user_genero,
             'user_fec_nac' => $request->user_fec_nac,
-        ]);
+        ];
+
+        // Manejo de la foto
+        if ($request->hasFile('user_foto')) {
+            $path = $request->file('user_foto')->store('profile-photos', 'public');
+            $userData['user_foto_path'] = $path;
+        }
+
+        $usuario = User::create($userData);
 
         return response()->json([
             'message' => 'Usuario registrado con éxito',
@@ -81,17 +91,54 @@ class AuthController extends Controller
      */
     public function profile(Request $request)
     {
+        $user = $request->user();
+        $profileData = $user->only([
+            'user_id',
+            'user_nombre',
+            'user_apellido',
+            'email',
+            'user_cedula',
+            'user_genero',
+            'user_fec_nac',
+            'user_foto_path'
+        ]);
+
+        // Añadir URL completa de la foto
+        if ($user->user_foto_path) {
+            $profileData['user_foto_url'] = asset("storage/{$user->user_foto_path}");
+        } else {
+            $profileData['user_foto_url'] = null;
+        }
+
         return response()->json([
-            'usuario' => $request->user()->only([
-                'user_id',
-                'user_nombre',
-                'user_apellido',
-                'email',
-                'user_cedula',
-                'user_genero',
-                'user_fec_nac',
-                'user_foto_path'
-            ])
+            'usuario' => $profileData
+        ]);
+    }
+
+    /**
+     * Actualizar foto de perfil
+     */
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'user_foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        // Eliminar la foto anterior si existe
+        if ($user->user_foto_path) {
+            Storage::disk('public')->delete($user->user_foto_path);
+        }
+
+        // Guardar la nueva foto
+        $path = $request->file('user_foto')->store('profile-photos', 'public');
+        $user->user_foto_path = $path;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto de perfil actualizada con éxito',
+            'foto_url' => asset("storage/$path")
         ]);
     }
 
