@@ -71,4 +71,8 @@ class User extends Authenticatable
     {
         return $this->password;
     }
+    public function goals()
+    {
+        return $this->hasMany(Goal::class, 'user_id', 'user_id');
+    }
 }
