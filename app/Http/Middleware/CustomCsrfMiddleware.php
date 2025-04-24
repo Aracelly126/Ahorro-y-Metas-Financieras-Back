@@ -15,7 +15,7 @@ class CustomCsrfMiddleware extends Middleware
      * @var array
      */
     protected $except = [
-        'api/auth/register',
-        'api/auth/login'
+        //'api/auth/register',
+        //'api/auth/login'
     ];
 }
