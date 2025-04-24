@@ -20,7 +20,7 @@ class AuthController extends Controller
             'user_nombre' => 'required|string|max:255',
             'user_apellido' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
             'user_genero' => 'nullable|in:M,F,O',
             'user_fec_nac' => 'nullable|date',
             'user_foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
