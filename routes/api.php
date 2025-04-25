@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContributionController;
@@ -41,4 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}/contributions/{id}', [ContributionController::class, 'show'])->name('contributions.show');
     Route::put('/goals/{goal}/contributions/{id}', [ContributionController::class, 'update'])->name('contributions.update');
     Route::delete('/goals/{goal}/contributions/{id}', [ContributionController::class, 'destroy'])->name('contributions.destroy');
+
+    Route::get('/goals/{goal}/alerts', [AlertController::class, 'index'])->name('alerts.index');
+    Route::post('/goals/{goal}/alerts', [AlertController::class, 'store'])->name('alerts.store');
+    Route::get('/goals/{goal}/alerts/{id}', [AlertController::class, 'show'])->name('alerts.show');
+    Route::put('/goals/{goal}/alerts/{id}', [AlertController::class, 'update'])->name('alerts.update');
+    Route::delete('/goals/{goal}/alerts/{id}', [AlertController::class, 'destroy'])->name('alerts.destroy');
 });
