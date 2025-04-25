@@ -50,9 +50,16 @@ class ContributionController extends Controller
             'remaining_amount' => $request->remaining_amount ?? ($goal->target_amount - ($goal->total_contributions + $request->amount))
         ]);
 
+        // Verificar si la meta se completó
+        $goal->refresh(); // Recargar datos actualizados
+        if ($goal->total_contributions >= $goal->target_amount) {
+            $goal->update(['completed' => true]);
+        }
+
         return response()->json([
             'message' => 'Aporte creado exitosamente',
-            'data' => $contribution
+            'data' => $contribution,
+            'goal_completed' => $goal->completed // Opcional: Indicar si la meta se completó
         ], 201);
     }
 
@@ -100,9 +107,16 @@ class ContributionController extends Controller
 
         $contribution->update($validator->validated());
 
+        // Verificar si la meta se completó después de actualizar
+        $goal->refresh();
+        if ($goal->total_contributions >= $goal->target_amount) {
+            $goal->update(['completed' => true]);
+        }
+
         return response()->json([
             'message' => 'Aporte actualizado exitosamente',
-            'data' => $contribution
+            'data' => $contribution,
+            'goal_completed' => $goal->completed // Opcional
         ]);
     }
 
@@ -122,6 +136,12 @@ class ContributionController extends Controller
         }
 
         $contribution->delete();
+
+        // Opcional: Verificar si al eliminar la contribución, la meta ya no está completada
+        $goal->refresh();
+        if ($goal->total_contributions < $goal->target_amount && $goal->completed) {
+            $goal->update(['completed' => false]);
+        }
 
         return response()->json([
             'message' => 'Aporte eliminado exitosamente'
