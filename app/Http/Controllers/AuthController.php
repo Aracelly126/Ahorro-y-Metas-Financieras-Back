@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -35,7 +37,6 @@ class AuthController extends Controller
             'user_fec_nac' => $request->user_fec_nac,
         ];
 
-        // Manejo de la foto
         if ($request->hasFile('user_foto')) {
             $path = $request->file('user_foto')->store('profile-photos', 'public');
             $userData['user_foto_path'] = $path;
@@ -43,8 +44,11 @@ class AuthController extends Controller
 
         $usuario = User::create($userData);
 
+        // Enviar correo de bienvenida
+        Mail::to($usuario->email)->send(new WelcomeEmail($usuario));
+
         return response()->json([
-            'message' => 'Usuario registrado con éxito',
+            'message' => 'Usuario registrado con éxito. ¡Te hemos enviado un correo de bienvenida!',
             'usuario' => $usuario
         ], 201);
     }

@@ -13,11 +13,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'loginsito'])->name('auth.login');
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
-Route::get('/', function (Request $request) {
-    Mail::to('prueba@prueba.com')->send(new RecordatorioMail());
-    return "hola mundo";
-});
-
 
 Route::middleware('auth:sanctum')->group(function () {
 
