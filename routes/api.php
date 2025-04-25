@@ -53,4 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/metrics/goals-progress', [MetricsController::class, 'getGoalsProgress'])->name('metrics.goals-progress');
     Route::get('/metrics/goals-progress/{goalId}', [MetricsController::class, 'getGoalProgress'])->name('metrics.goal-progress');
     Route::get('/metrics/goals-summary', [MetricsController::class, 'getGoalsSummary'])->name('metrics.goals-summary');
+
+    Route::get('/metrics/estimated-savings/{goalId}/{period?}', [MetricsController::class, 'getEstimatedSavings'])
+        ->where('period', 'month|week')->name('metrics.estimated-savings');
+    Route::get('/metrics/check-risk/{goalId}', [MetricsController::class, 'checkGoalRisk'])->name('metrics.check-risk');
+    Route::get('/metrics/full-summary/{goalId}', [MetricsController::class, 'getGoalFullSummary'])->name('metrics.full-summary');
 });
