@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\GoalController;
-use App\Models\Category;
+use App\Http\Controllers\MetricsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,4 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/goals/{goal}/alerts/{id}', [AlertController::class, 'show'])->name('alerts.show');
     Route::put('/goals/{goal}/alerts/{id}', [AlertController::class, 'update'])->name('alerts.update');
     Route::delete('/goals/{goal}/alerts/{id}', [AlertController::class, 'destroy'])->name('alerts.destroy');
+
+    // OPERACIONES
+    Route::get('/metrics/goals-progress', [MetricsController::class, 'getGoalsProgress'])->name('metrics.goals-progress');
+    Route::get('/metrics/goals-progress/{goalId}', [MetricsController::class, 'getGoalProgress'])->name('metrics.goal-progress');
+    Route::get('/metrics/goals-summary', [MetricsController::class, 'getGoalsSummary'])->name('metrics.goals-summary');
 });
