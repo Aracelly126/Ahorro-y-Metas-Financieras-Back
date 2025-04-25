@@ -6,14 +6,21 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MetricsController;
+use App\Mail\RecordatorioMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'loginsito'])->name('auth.login');
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+Route::get('/', function (Request $request) {
+    Mail::to('prueba@prueba.com')->send(new RecordatorioMail());
+    return "hola mundo";
+});
 
 
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -58,4 +65,5 @@ Route::middleware('auth:sanctum')->group(function () {
         ->where('period', 'month|week')->name('metrics.estimated-savings');
     Route::get('/metrics/check-risk/{goalId}', [MetricsController::class, 'checkGoalRisk'])->name('metrics.check-risk');
     Route::get('/metrics/full-summary/{goalId}', [MetricsController::class, 'getGoalFullSummary'])->name('metrics.full-summary');
+
 });
