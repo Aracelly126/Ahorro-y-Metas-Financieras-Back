@@ -77,6 +77,12 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('API Token')->plainTextToken;
 
+        if ($user->user_foto_path) {
+            $user->user_foto_url = asset("storage/{$user->user_foto_path}");
+        } else {
+            $user->user_foto_url = null;
+        }
+
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'token' => $token,
