@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('goal_name', 100);
             $table->decimal('target_amount', 15, 2);
             $table->date('deadline_date')->nullable();
+            $table->enum('goal_state', ['pendiente', 'cumplido', 'cancelado'])->default('pendiente');
             $table->foreignId('category_id')->nullable()->constrained('categories', 'category_id')->onDelete('set null')->onUpdate('cascade');
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();

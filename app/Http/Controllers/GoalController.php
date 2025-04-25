@@ -14,7 +14,12 @@ class GoalController extends Controller
      */
     public function index(Request $request)
     {
-        $goals = $request->user()->goals()->with('category')->get();
+        $goals = $request->user()
+            ->goals()
+            ->with('category')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json($goals);
     }
 
@@ -27,6 +32,7 @@ class GoalController extends Controller
             'goal_name' => 'required|string|max:100',
             'target_amount' => 'required|numeric|min:0.01',
             'deadline_date' => 'nullable|date',
+            'goal_state' => 'sometimes|in:pendiente,cumplido,cancelado',
             'category_id' => 'nullable|exists:categories,category_id'
         ]);
 
@@ -34,7 +40,13 @@ class GoalController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $goal = $request->user()->goals()->create($validator->validated());
+        // Establecer estado por defecto si no se proporciona
+        $validatedData = $validator->validated();
+        if (!isset($validatedData['goal_state'])) {
+            $validatedData['goal_state'] = 'pendiente';
+        }
+
+        $goal = $request->user()->goals()->create($validatedData);
 
         return response()->json([
             'message' => 'Meta creada exitosamente',
@@ -47,9 +59,9 @@ class GoalController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        $goal = Goal::with('category', 'contributions')->findOrFail($id);
+        $goal = Goal::with(['category', 'contributions', 'alerts'])
+            ->findOrFail($id);
 
-        // Verificación simple de pertenencia
         if ($goal->user_id !== $request->user()->user_id) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
@@ -64,7 +76,6 @@ class GoalController extends Controller
     {
         $goal = Goal::findOrFail($id);
 
-        // Verificación simple de pertenencia
         if ($goal->user_id !== $request->user()->user_id) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
@@ -73,6 +84,7 @@ class GoalController extends Controller
             'goal_name' => 'sometimes|string|max:100',
             'target_amount' => 'sometimes|numeric|min:0.01',
             'deadline_date' => 'nullable|date',
+            'goal_state' => 'sometimes|in:pendiente,cumplido,cancelado',
             'category_id' => 'nullable|exists:categories,category_id'
         ]);
 
@@ -82,9 +94,20 @@ class GoalController extends Controller
 
         $goal->update($validator->validated());
 
+        // Si se marca como cumplido, verificar si se alcanzó el monto objetivo
+        if ($request->has('goal_state') && $request->goal_state === 'cumplido') {
+            $totalContributions = $goal->contributions()->sum('amount');
+            if ($totalContributions < $goal->target_amount) {
+                return response()->json([
+                    'message' => 'No se puede marcar como cumplido: el total de aportes no alcanza el monto objetivo',
+                    'data' => $goal
+                ], 422);
+            }
+        }
+
         return response()->json([
             'message' => 'Meta actualizada exitosamente',
-            'data' => $goal
+            'data' => $goal->fresh() // Devuelve los datos actualizados
         ]);
     }
 
@@ -95,7 +118,6 @@ class GoalController extends Controller
     {
         $goal = Goal::findOrFail($id);
 
-        // Verificación simple de pertenencia
         if ($goal->user_id !== $request->user()->user_id) {
             return response()->json(['message' => 'No autorizado'], 403);
         }

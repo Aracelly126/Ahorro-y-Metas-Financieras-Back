@@ -15,6 +15,7 @@ class Goal extends Model
         'goal_name',
         'target_amount',
         'deadline_date',
+        'goal_state',
         'category_id',
         'user_id'
     ];
